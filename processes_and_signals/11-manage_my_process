@@ -1,39 +1,28 @@
 #!/usr/bin/env bash
-
-if [[ $1 == "start" ]]; then
-    # Start manage_my_process
-    nohup bash /path/to/manage_my_process.sh >/dev/null 2>&1 &
-    
-    # Save the PID to /var/run/my_process.pid
-    echo $! > /var/run/my_process.pid
-    
-    echo "manage_my_process started"
-elif [[ $1 == "stop" ]]; then
-    # Stop manage_my_process by killing the process using PID
-    if [[ -f /var/run/my_process.pid ]]; then
-        pid=$(cat /var/run/my_process.pid)
-        kill $pid
-        rm /var/run/my_process.pid
-        echo "manage_my_process stopped"
-    else
-        echo "manage_my_process is not running"
-    fi
-elif [[ $1 == "restart" ]]; then
-    # Stop manage_my_process if running
-    if [[ -f /var/run/my_process.pid ]]; then
-        pid=$(cat /var/run/my_process.pid)
-        kill $pid
-        rm /var/run/my_process.pid
-    fi
-    
-    # Start manage_my_process
-    nohup bash /path/to/manage_my_process.sh >/dev/null 2>&1 &
-    
-    # Save the new PID to /var/run/my_process.pid
-    echo $! > /var/run/my_process.pid
-    
-    echo "manage_my_process restarted"
+#manage
+if [[ "$#" == "1" ]]; then
+ if [[ "$1" == "start" ]]; then
+   ./manage_my_process &
+   echo "$!" > /var/run/my_process.pid
+   echo "manage_my_process started"
+ elif [[ "$1" == "stop" ]]; then
+   if test -f "/var/run/my_process.pid"; then
+     kill "$(cat /var/run/my_process.pid)"
+   fi
+   rm /var/run/my_process.pid
+   echo "manage_my_process stopped"
+ elif [[ "$1" == "restart" ]]; then
+   # stop program
+   if test -f "/var/run/my_process.pid"; then
+     kill "$(cat /var/run/my_process.pid)"
+   fi
+   # start program   
+   ./manage_my_process &
+   echo "$!" > /var/run/my_process.pid
+   echo "manage_my_process restarted"
+ else
+   echo "Usage: manage_my_process {start|stop|restart}"
+ fi
 else
-    echo "Usage: manage_my_process {start|stop|restart}"
+  echo "Usage: manage_my_process {start|stop|restart}"
 fi
-
